@@ -1,14 +1,15 @@
+import os
 import sys
 import math
 
 """
-A Shakespeare Compiler written in Python, splc.py
-This is a compiler that implements the majority of the Shakespeare programming language
-invented by Kalle Hasselstrom and Jon Aslund, I take no credit for inventing the language.
-This software is relased into the public domain
-(c) V1.2 Sam Donow 2013-2015
-sad3@williams.edu
-drsam94@gmail.com
+    A Shakespeare Compiler written in Python, splc.py
+    This is a compiler that implements the majority of the Shakespeare programming language
+    invented by Kalle Hasselstrom and Jon Aslund, I take no credit for inventing the language.
+    This software is relased into the public domain
+    (c) V1.2 Sam Donow 2013-2015
+    sad3@williams.edu
+    drsam94@gmail.com
 """
 
 #missing features
@@ -462,82 +463,94 @@ def parseAllActAndSceneDescriptions():
             current_scene += 1
             scene_names[current_act][desc] = current_scene
 
-#-------------------------------Begin Main Program-------------------------#
-Assert(len(sys.argv) > 1, "No input file")
-filename = sys.argv[1]
+def main():
+    """
+        Begin Main Program
+    """
+    Assert(len(sys.argv) > 1, "No input file")
+    filename = sys.argv[1]
 
-f = open(filename, 'r')
-src = f.readlines()
-f.close()
+    f = open(filename, 'r')
+    src = f.readlines()
+    f.close()
 
-loadWordLists()
+    loadWordLists()
 
-#parse the title - all the text up until the first .
-#title is unimportant and is thrown out
+    #parse the title - all the text up until the first .
+    #title is unimportant and is thrown out
 
-while src[N].find('.') < 0:
+    while src[N].find('.') < 0:
+        N += 1
     N += 1
-N += 1
-#title is thrown out
+    #title is thrown out
 
-writeToFile("// " + filename + "\n" +
-"// compiled with splc.py (c) Sam Donow 2013-2015\n" +
-"#include <stdio.h>\n" +
-"#include <math.h>\n" +
-'#include "include/mathhelpers.h"\n' +
-"int condition = 0;\n" +
-"char inputbuffer[BUFSIZ];\n" +
-"int main() {\n")
+    writeToFile(
+        os.linesep.join([
+            "// " + filename,
+            "// compiled with splc.py (c) Sam Donow 2013-2015",
+            "#include <stdio.h>",
+            "#include <math.h>",
+            "int cube (int x) { return x * x * x; }",
+            "int twice (int x) { return 2 * x; }",
+            "int square (int x) { return x * x; }",
+            "int condition = 0;",
+            "char inputbuffer[BUFSIZ];",
+            "int main() {"
+        ])
+    )
 
-handleDeclarations()
-parseAllActAndSceneDescriptions()
+    handleDeclarations()
+    parseAllActAndSceneDescriptions()
 
-scenes = []
-unfinished = False
-while N < len(src):
-    if beginsWithNoWhitespace(src[N], 'Act'):
-        Assert (getActOrSceneNumber(src[N], 'Act') == actnum + 1, "Illegal Act numbering")
-        if actnum > 0:
-            writeScenes(scenes, False)
-            scenes = []
-        actnum += 1
-        #act_names[getActOrSceneDescription(src[N])] = actnum
-        N += 1
-    elif beginsWithNoWhitespace(src[N], 'Scene'):
-        Assert (getActOrSceneNumber(src[N], 'Scene') == len(scenes) + 1, "Illegal Scene numbering")
-        #scene_names[getActOrSceneDescription(src[N])] = len(scenes) + 1
-        N += 1
-        speaker = ""
-        target  = ""
-        while (N < len(src)) and not (beginsWithNoWhitespace(src[N], 'Scene') or beginsWithNoWhitespace(src[N], 'Act')):
-            if beginsWithNoWhitespace(src[N], '['):
-                parseEnterOrExit()
-                if not unfinished:
-                    scenes.append(";\n")
-                    unfinished = True
-                N += 1
-            elif src[N].find(':') >= 0:
-                name = (src[N][:src[N].find(':')]).split(" ")[-1]
-                Assert (name in stage, "An actor who is not on stage is trying to speak")
-                for actor in stage:
-                    if actor != name:
-                        target = actor
-                        speaker = name
-                N += 1
-                statements = getStatements()
-                scenecode = ""
-                for statement in statements:
-                    scenecode += parseStatement(statement)
-                if not unfinished:
-                    scenes.append(scenecode)
-                    unfinished = True
+    scenes = []
+    unfinished = False
+    while N < len(src):
+        if beginsWithNoWhitespace(src[N], 'Act'):
+            Assert (getActOrSceneNumber(src[N], 'Act') == actnum + 1, "Illegal Act numbering")
+            if actnum > 0:
+                writeScenes(scenes, False)
+                scenes = []
+            actnum += 1
+            #act_names[getActOrSceneDescription(src[N])] = actnum
+            N += 1
+        elif beginsWithNoWhitespace(src[N], 'Scene'):
+            Assert (getActOrSceneNumber(src[N], 'Scene') == len(scenes) + 1, "Illegal Scene numbering")
+            #scene_names[getActOrSceneDescription(src[N])] = len(scenes) + 1
+            N += 1
+            speaker = ""
+            target  = ""
+            while (N < len(src)) and not (beginsWithNoWhitespace(src[N], 'Scene') or beginsWithNoWhitespace(src[N], 'Act')):
+                if beginsWithNoWhitespace(src[N], '['):
+                    parseEnterOrExit()
+                    if not unfinished:
+                        scenes.append(";\n")
+                        unfinished = True
+                    N += 1
+                elif src[N].find(':') >= 0:
+                    name = (src[N][:src[N].find(':')]).split(" ")[-1]
+                    Assert (name in stage, "An actor who is not on stage is trying to speak")
+                    for actor in stage:
+                        if actor != name:
+                            target = actor
+                            speaker = name
+                    N += 1
+                    statements = getStatements()
+                    scenecode = ""
+                    for statement in statements:
+                        scenecode += parseStatement(statement)
+                    if not unfinished:
+                        scenes.append(scenecode)
+                        unfinished = True
+                    else:
+                        scenes[-1] += scenecode
                 else:
-                    scenes[-1] += scenecode
-            else:
-                N += 1
-        unfinished = False
+                    N += 1
+            unfinished = False
 
-    else:
-        N += 1
-writeScenes(scenes, True)
-writeToFile("}")
+        else:
+            N += 1
+    writeScenes(scenes, True)
+    writeToFile("}")
+
+if __name__ == "__main__":
+    main()

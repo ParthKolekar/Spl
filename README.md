@@ -20,7 +20,7 @@ The following features have yet to be or may never be implemented:
 
 The following features not in the original language spec is implemented but is a work in progress:
 
-PRETTY GOTOS:
+*PRETTY GOTOS:*
 
 In the original language spec, goto statements take the form "let us proceed to scene III", "let us return to act I",
 etc. As this is both awkward and non-Shakesperian, I have made it so that you can use the name of an act or scene (not case,
@@ -31,7 +31,7 @@ Then the sentence "let us return to the forest" is equivalent to "let us return 
 
 Like standard gotos, you can not jump to a scene within an act other than the one you are currently in.
 
-INITIAL DECLARATIONS:
+*INITIAL DECLARATIONS:*
 
 In the original language, everything after the comma in a declaration, such as:
 
@@ -54,18 +54,20 @@ later versions of this compiler
 
 To use spl, simply run
 
-$ ./spl [Input File]
-$ ./a.out
+    $ ./spl [Input File]
+    $ ./a.out
 
 Or, if you would like, you can run
 
-$ python splc.py [Input File] > [Output File]
-$ gcc [Output File] -lm
-$ ./a.out
+    $ python splc.py [Input File] > [Output File]
+    $ gcc [Output File] -lm
+    $ ./a.out
 
 The spl script should work in any bash terminal, on Windows, the explicit python method should work if you have
 all of the right programs installed. I may at some time get around to writing a .bat script for Windows users.
 
-Depenencies:
-Python (2.X or 3.X)
-gcc
+Depenencies
+-----------
+
+- Python (2.X or 3.X)
+- gcc
